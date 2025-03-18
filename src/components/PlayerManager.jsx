@@ -39,7 +39,7 @@ function PlayerManager() {
           addPlayer();
         }}
         className="grid grid-cols-1 sm:grid-cols-3 gap-4"
-        aria-label="Add Player Form"
+        aria-label="addPlayerForm"
       >
         <div className="flex flex-col">
           <label htmlFor="player-name" className="text-sm font-medium text-gray-700 mb-1">Player Name</label>
@@ -67,7 +67,7 @@ function PlayerManager() {
           <button
             type="submit"
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-            aria-label="Add Player"
+            aria-label="addPlayerButton"
           >
             ➕ Add Player
           </button>
@@ -77,7 +77,7 @@ function PlayerManager() {
       <hr className="my-4 border-gray-300" />
 
       {/* Player Table */}
-      <table className="w-full border text-sm">
+      <table aria-label="playerTable" className="w-full border text-sm">
         <thead className="bg-gray-100 text-left">
           <tr>
             <th className="p-2 font-semibold">Name</th>
@@ -94,7 +94,7 @@ function PlayerManager() {
                 <button
                   className="text-red-600 hover:text-red-800 text-sm px-2 py-1 border border-red-300 rounded-full"
                   onClick={() => deletePlayer(player.id)}
-                  aria-label={`Delete ${player.name}`}
+                  aria-label={`deletePlayerButton-${player.name}`}
                 >
                   ➖
                 </button>
@@ -108,4 +108,3 @@ function PlayerManager() {
 }
 
 export default PlayerManager;
-

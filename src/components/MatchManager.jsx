@@ -44,7 +44,7 @@ function MatchManager({ onSelectMatch }) {
           addMatch();
         }}
         className="grid grid-cols-1 sm:grid-cols-3 gap-4"
-        aria-label="Add Match Form"
+        aria-label="addMatchForm"
       >
         <div className="flex flex-col">
           <label htmlFor="match-date" className="text-sm font-medium text-gray-700 mb-1">Date</label>
@@ -74,7 +74,7 @@ function MatchManager({ onSelectMatch }) {
           <button
             type="submit"
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-            aria-label="Add Match"
+            aria-label="addMatchButton"
           >
             ➕ Add Match
           </button>
@@ -84,7 +84,7 @@ function MatchManager({ onSelectMatch }) {
       <hr className="my-4 border-gray-300" />
 
       {/* Match Table */}
-      <table className="w-full border text-sm">
+      <table aria-label="matchTable" className="w-full border text-sm">
         <thead className="bg-gray-100 text-left">
           <tr>
             <th className="p-2 font-semibold">Date</th>
@@ -98,7 +98,7 @@ function MatchManager({ onSelectMatch }) {
               key={match.id}
               className="border-t hover:bg-gray-50 cursor-pointer"
               role="button"
-              aria-label={`Select match against ${match.opponent} on ${match.date}`}
+              aria-label={`selectMatch-${match.opponent}`}
               onClick={() => selectMatch(match.id)}
               tabIndex="0"
               onKeyDown={(e) => {
@@ -111,10 +111,10 @@ function MatchManager({ onSelectMatch }) {
                 <button
                   className="text-red-600 hover:text-red-800 text-sm px-2 py-1 border border-red-300 rounded-full"
                   onClick={(e) => {
-                    e.stopPropagation(); // prevent match selection click
+                    e.stopPropagation(); // Prevent row selection
                     deleteMatch(match.id);
                   }}
-                  aria-label={`Delete match against ${match.opponent}`}
+                  aria-label={`deleteMatchButton-${match.opponent}`}
                 >
                   ➖
                 </button>
