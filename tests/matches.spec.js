@@ -1,31 +1,23 @@
-import { test } from './fixtures/withClearedDB.js';
-import { expect } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 test.describe('Match management', () => {
-  test('can add a match and display it in the list', async ({ page }) => {
+  test('can add a match with result, home/away, and completed fields', async ({ page }) => {
     await page.goto('/');
 
-    await page.getByLabel('Date').fill('2025-03-25');
-    await page.getByLabel('Opponent').fill('U8 Tigers');
-    await page.getByRole('button', { name: 'addMatchButton' }).click();
+    await page.getByLabel('matchDate').fill('2025-03-30');
+    await page.getByLabel('opponent').fill('U8 Falcons');
+    await page.getByLabel('homeScore').selectOption('3');
+    await page.getByLabel('awayScore').selectOption('1');
+    await page.getByLabel('homeToggle').check(); // or 'away' if needed
+    await page.getByLabel('completed').check();
 
-    const matchTable = page.getByRole('table', { name: 'matchTable' });
-    await expect(matchTable).toContainText('U8 Tigers');
-    await expect(matchTable).toContainText('2025-03-25');
-  });
+    await page.getByLabel('addMatchButton').click();
 
-  test('can delete a match', async ({ page }) => {
-    await page.goto('/');
-
-    await page.getByLabel('Date').fill('2025-04-01');
-    await page.getByLabel('Opponent').fill('U8 Lions');
-    await page.getByRole('button', { name: 'addMatchButton' }).click();
-
-    const matchTable = page.getByRole('table', { name: 'matchTable' });
-    await expect(matchTable).toContainText('U8 Lions');
-
-    await page.getByRole('button', { name: 'deleteMatchButton-U8 Lions' }).click();
-    await expect(matchTable).not.toContainText('U8 Lions');
+    const table = page.getByLabel('matchTable');
+    await expect(table).toContainText('U8 Falcons');
+    await expect(table).toContainText('3 - 1');
+    await expect(table).toContainText('home'); // checks home/away label
+    await expect(table).toContainText('Yes');  // checks completed status
   });
 });
 

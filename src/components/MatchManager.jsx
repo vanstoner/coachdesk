@@ -3,8 +3,12 @@ import { db } from '../db/localDB';
 
 function MatchManager({ onSelectMatch }) {
   const [matches, setMatches] = useState([]);
-  const [opponent, setOpponent] = useState('');
   const [matchDate, setMatchDate] = useState('');
+  const [opponent, setOpponent] = useState('');
+  const [homeScore, setHomeScore] = useState('0');
+  const [awayScore, setAwayScore] = useState('0');
+  const [homeAway, setHomeAway] = useState('home');
+  const [completed, setCompleted] = useState(false);
 
   useEffect(() => {
     loadMatches();
@@ -17,9 +21,20 @@ function MatchManager({ onSelectMatch }) {
 
   const addMatch = async () => {
     if (!opponent.trim() || !matchDate) return;
-    const newId = await db.matches.add({ opponent, date: matchDate });
+    const newId = await db.matches.add({
+      opponent,
+      date: matchDate,
+      homeScore,
+      awayScore,
+      homeAway,
+      completed,
+    });
     setOpponent('');
     setMatchDate('');
+    setHomeScore('0');
+    setAwayScore('0');
+    setHomeAway('home');
+    setCompleted(false);
     loadMatches();
     if (onSelectMatch) onSelectMatch(newId);
   };
@@ -29,68 +44,125 @@ function MatchManager({ onSelectMatch }) {
     loadMatches();
   };
 
-  const selectMatch = (id) => {
-    if (onSelectMatch) onSelectMatch(id);
-  };
-
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-800">📅 Match Manager</h2>
-      <form onSubmit={(e) => { e.preventDefault(); addMatch(); }}
-            className="grid grid-cols-1 sm:grid-cols-3 gap-4"
-            aria-label="addMatchForm">
-        <div className="flex flex-col">
-          <label htmlFor="match-date" className="text-sm font-medium text-gray-700 mb-1">Date</label>
+    <div className="mt-10 max-w-4xl mx-auto bg-white p-6 rounded-2xl shadow-lg">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">📅 Match Manager</h2>
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          addMatch();
+        }}
+        className="grid grid-cols-2 sm:grid-cols-3 gap-4 items-end mb-6"
+        aria-label="addMatchForm"
+      >
+        <input
+          aria-label="matchDate"
+          type="date"
+          className="border px-3 py-2 rounded shadow-sm"
+          value={matchDate}
+          onChange={(e) => setMatchDate(e.target.value)}
+        />
+
+        <input
+          aria-label="opponent"
+          type="text"
+          placeholder="Opponent"
+          className="border px-3 py-2 rounded shadow-sm"
+          value={opponent}
+          onChange={(e) => setOpponent(e.target.value)}
+        />
+
+        <select
+          aria-label="homeScore"
+          className="border px-3 py-2 rounded shadow-sm"
+          value={homeScore}
+          onChange={(e) => setHomeScore(e.target.value)}
+        >
+          {[...Array(21).keys()].map((n) => (
+            <option key={n} value={n}>{n}</option>
+          ))}
+        </select>
+
+        <select
+          aria-label="awayScore"
+          className="border px-3 py-2 rounded shadow-sm"
+          value={awayScore}
+          onChange={(e) => setAwayScore(e.target.value)}
+        >
+          {[...Array(21).keys()].map((n) => (
+            <option key={n} value={n}>{n}</option>
+          ))}
+        </select>
+
+        <div className="flex items-center gap-2">
+          <label>
+            <input
+              type="radio"
+              name="homeAway"
+              value="home"
+              aria-label="homeToggle"
+              checked={homeAway === 'home'}
+              onChange={() => setHomeAway('home')}
+            /> Home
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="homeAway"
+              value="away"
+              aria-label="awayToggle"
+              checked={homeAway === 'away'}
+              onChange={() => setHomeAway('away')}
+            /> Away
+          </label>
+        </div>
+
+        <label className="flex items-center gap-2">
           <input
-            id="match-date"
-            type="date"
-            className="border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-blue-500"
-            value={matchDate}
-            onChange={(e) => setMatchDate(e.target.value)}
+            type="checkbox"
+            aria-label="completed"
+            checked={completed}
+            onChange={() => setCompleted(!completed)}
           />
-        </div>
-        <div className="flex flex-col">
-          <label htmlFor="match-opponent" className="text-sm font-medium text-gray-700 mb-1">Opponent</label>
-          <input
-            id="match-opponent"
-            type="text"
-            className="border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-blue-500"
-            value={opponent}
-            onChange={(e) => setOpponent(e.target.value)}
-          />
-        </div>
-        <div className="flex items-end">
-          <button type="submit"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-                  aria-label="addMatchButton">
-            ➕ Add Match
-          </button>
-        </div>
+          Completed
+        </label>
+
+        <button
+          type="submit"
+          aria-label="addMatchButton"
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Add Match
+        </button>
       </form>
-      <hr className="border-gray-300" />
-      <table className="w-full border border-gray-300 text-sm" aria-label="matchTable">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="p-2 border border-gray-300">Date</th>
-            <th className="p-2 border border-gray-300">Opponent</th>
-            <th className="p-2 border border-gray-300 text-right">Actions</th>
+
+      <table aria-label="matchTable" className="w-full border text-sm">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="border px-2 py-1">Date</th>
+            <th className="border px-2 py-1">Opponent</th>
+            <th className="border px-2 py-1">Score</th>
+            <th className="border px-2 py-1">Home/Away</th>
+            <th className="border px-2 py-1">Completed</th>
+            <th className="border px-2 py-1">Actions</th>
           </tr>
         </thead>
         <tbody>
           {matches.map((match) => (
-            <tr key={match.id} className="hover:bg-gray-50 cursor-pointer"
-                onClick={() => selectMatch(match.id)}
-                role="button"
-                aria-label={`selectMatch-${match.opponent}`}
-                tabIndex="0"
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') selectMatch(match.id); }}>
-              <td className="p-2 border border-gray-200">{match.date}</td>
-              <td className="p-2 border border-gray-200">{match.opponent}</td>
-              <td className="p-2 border border-gray-200 text-right">
-                <button className="text-red-600 hover:text-red-800 text-sm px-2 py-1 border border-red-300 rounded-full"
-                        onClick={(e) => { e.stopPropagation(); deleteMatch(match.id); }}
-                        aria-label={`deleteMatchButton-${match.opponent}`}>
-                  ➖
+            <tr key={match.id} className="text-center">
+              <td className="border px-2 py-1">{match.date}</td>
+              <td className="border px-2 py-1">{match.opponent}</td>
+              <td className="border px-2 py-1">{match.homeScore} - {match.awayScore}</td>
+              <td className="border px-2 py-1">{match.homeAway}</td>
+              <td className="border px-2 py-1">{match.completed ? 'Yes' : 'No'}</td>
+              <td className="border px-2 py-1">
+                <button
+                  aria-label={`deleteMatch-${match.id}`}
+                  onClick={() => deleteMatch(match.id)}
+                  className="text-red-600 text-sm hover:underline"
+                >
+                  −
                 </button>
               </td>
             </tr>
@@ -102,3 +174,4 @@ function MatchManager({ onSelectMatch }) {
 }
 
 export default MatchManager;
+
