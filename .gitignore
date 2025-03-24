@@ -35,4 +35,7 @@ dist/
 test-results/
 playwright-report/
 
+# Local backups
+OLD_*
+
 
